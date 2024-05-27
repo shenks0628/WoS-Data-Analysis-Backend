@@ -23,7 +23,7 @@ from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
 from keywordCount import get_keywords
-from fileSecure import decrypt_to_string
+from fileSecure import decrypt_to_string, decrypt_string
 
 app = Flask(__name__)
 CORS(app)
@@ -36,9 +36,11 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 storage = storage.bucket("wos-data-analysis-tool.appspot.com")
 
+APIKEY = '{"iv": "8451de536e21fd02ef0fb490066054aa", "auth_tag": "3c1bb378b0bc94a6d62c7045c97085e8", "data": "7bf658b61b2987377aaac82d9080a1ba1de18d82158d3c3f519abd29c9bf5fa68f595331dc7599"}'
+
 # firebase configuration
 firebaseConfig = {
-    "apiKey": "AIzaSyDU9yTCklZ9Jj6V6UqHwp0h2CiDiK5_Ygo",
+    "apiKey": decrypt_string(APIKEY),
     "authDomain": "wos-data-analysis-tool.firebaseapp.com",
     "databaseURL": "https://wos-data-analysis-tool.firebaseio.com",
     "projectId": "wos-data-analysis-tool",
@@ -89,9 +91,7 @@ def register():
     try:
         user = auth.create_user_with_email_and_password(email, password)
         doc_ref = db.collection('users').document(email)
-        doc_ref.set({
-            'files': []
-        })
+        doc_ref.set({})
         auth.send_email_verification(user['idToken'])
         return jsonify({"message": "Register successful"}), 200
     except Exception as e:
