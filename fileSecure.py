@@ -100,7 +100,6 @@ def decrypt_to_string(input_path, key=secret_key):
 # print(decrypted_message)
 
 if __name__ == "__main__":
-    decrypt_string(encrypt_string("AIzaSyDU9yTCklZ9Jj6V6UqHwp0h2CiDiK5_Ygo"))
     # Encrypt a test file
     encrypt_file('serviceAccount.json')
     # Decrypt the file and print the result
