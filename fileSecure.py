@@ -5,9 +5,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from dotenv import load_dotenv
+
+# load_dotenv()
 
 SECRET_SALT = os.getenv('SECRET_SALT', 'Secret Salt You Should Update')
 SECRET_PASSPHRASE = os.getenv('SECRET_PASSPHRASE', 'Secret Key You Should Update')
+
+print(f"Using salt: {SECRET_SALT}")
+print(f"Using passphrase: {SECRET_PASSPHRASE}")
 
 # Derive key from passphrase and salt
 def derive_key(passphrase, salt):
@@ -38,7 +44,7 @@ def encrypt_string(input_string, key=secret_key):
         'auth_tag': auth_tag.hex(),
         'data': encrypted.hex(),
     }
-    print(json.dumps(result))
+    # print(json.dumps(result))
     return json.dumps(result)
 
 def decrypt_string(input_string, key=secret_key):
