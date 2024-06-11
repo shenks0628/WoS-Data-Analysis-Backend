@@ -3,6 +3,7 @@ import firebase_admin.storage
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import json
+import io
 import os
 import sys
 import requests
@@ -23,7 +24,7 @@ from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
 from keywordCount import get_keywords
-from fileSecure import decrypt_to_string, decrypt_string
+from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 
 app = Flask(__name__)
 CORS(app)
@@ -36,7 +37,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 storage = storage.bucket("wos-data-analysis-tool.appspot.com")
 
-APIKEY = '{"iv": "8451de536e21fd02ef0fb490066054aa", "auth_tag": "3c1bb378b0bc94a6d62c7045c97085e8", "data": "7bf658b61b2987377aaac82d9080a1ba1de18d82158d3c3f519abd29c9bf5fa68f595331dc7599"}'
+APIKEY = '{"iv": "860a81f249ae899ac16e1da2a0d79010", "auth_tag": "7e727a1cb5c82277c1e52f24cd681328", "data": "95f5c4d110a15bfe19f7326bb0675e59e8f60f78ce04d7b781460e8d58a7f983d9ff671a2e7f87"}'
 
 # firebase configuration
 firebaseConfig = {
@@ -53,15 +54,6 @@ firebaseConfig = {
 # initialize firebase
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
-
-FernetKey = Fernet.generate_key()
-cipher_suite = Fernet(FernetKey)
-
-def encrypt_password(password):
-    return cipher_suite.encrypt(password.encode('utf-8')).decode('utf-8')
-
-def decrypt_password(password):
-    return cipher_suite.decrypt(password.encode('utf-8')).decode('utf-8')
 
 @app.route('/')
 def home():
@@ -83,7 +75,7 @@ def loginPage():
 def keywordPage():
     return send_file('webpage/keywordCount.html')
 
-@app.route('/registerAPI', methods=['POST'])
+@app.route('/api/auth/register', methods=['POST'])
 def register():
     data = request.get_json()
     email = data.get('email')
@@ -97,14 +89,14 @@ def register():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/loginAPI', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
     try:
         user = auth.sign_in_with_email_and_password(email, password)
-        encrypted = encrypt_password(password)
+        encrypted = encrypt_string(password)
         user_id_token = user['idToken']
         account_info = auth.get_account_info(user_id_token)
         users = account_info['users']
@@ -123,7 +115,7 @@ def login():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/forgotPasswordAPI', methods=['POST'])
+@app.route('/api/auth/forgotPassword', methods=['POST'])
 def forgotPassword():
     data = request.get_json()
     email = data.get('email')
@@ -134,15 +126,16 @@ def forgotPassword():
         return jsonify({"message": "Email not sent"}), 400
 
 # get the *.txt file from the frontend
-@app.route('/uploadAPI', methods=['POST'])
+@app.route('/api/file/upload', methods=['POST'])
 def upload():
     # get the file
     try:
-        files = request.files.getlist('file')
-        fileSet = request.form.get('fileSet')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        password = decrypt_password(password)
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        files = data.get('files')
+        fileSet = data.get('fileSet')
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
@@ -156,21 +149,13 @@ def upload():
         else:
             n = len(arr)
         for file in files:
-            if file.filename.endswith('.txt'):
+            if file['name'].endswith('.txt'):
                 saved_filename = userId + "." + fileSet + "." + str(n) + ".txt"
                 n += 1
-                # fileSize = len(file.read())
-                # file.seek(0)
-                # storedFiles = storage.list_blobs(prefix=f'{userId}.{fileSet}')
-                # exist = False
-                # for f in storedFiles:
-                #     if f.size == fileSize:
-                #         exist = True
-                #         break
-                # if exist:
-                #     continue
                 blob = storage.blob(saved_filename)
-                blob.upload_from_file(file)
+                fileContent = file['content'].encode('utf-8')
+                fileStream = io.BytesIO(fileContent)
+                blob.upload_from_file(fileStream, content_type='text/plain')
                 blob.make_public()
                 file_url = blob.public_url
                 results.append({
@@ -184,13 +169,13 @@ def upload():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/keywordCountAPI', methods=['POST'])
+@app.route('/api/file/keywordCount', methods=['POST'])
 def keywordCount():
     try:
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-        password = decrypt_password(password)
+        password = decrypt_string(password)
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
