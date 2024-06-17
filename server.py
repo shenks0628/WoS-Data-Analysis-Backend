@@ -135,7 +135,7 @@ def upload():
         password = data.get('password')
         password = decrypt_string(password)
         files = data.get('files')
-        fileSet = data.get('fileSet')
+        workspace = data.get('workspace')
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
@@ -143,14 +143,14 @@ def upload():
         results = []
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
-        arr = doc.get(fileSet)
+        arr = doc.get(workspace)
         if not arr:
             n = 0
         else:
             n = len(arr)
         for file in files:
             if file['name'].endswith('.txt'):
-                saved_filename = userId + "." + fileSet + "." + str(n) + ".txt"
+                saved_filename = userId + "." + workspace + "." + str(n) + ".txt"
                 n += 1
                 blob = storage.blob(saved_filename)
                 fileContent = file['content'].encode('utf-8')
@@ -159,13 +159,18 @@ def upload():
                 blob.make_public()
                 file_url = blob.public_url
                 results.append({
+                    'name': file['name'],
                     'url': file_url
                 })
         if results:
             doc_ref.update({
-                f'{fileSet}': firestore.ArrayUnion(results)
+                f'{workspace}': firestore.ArrayUnion(results)
             })
-        return jsonify(results), 200
+        response = {
+            "message": "Upload successful",
+            "files": results
+        }
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
@@ -179,11 +184,11 @@ def keywordCount():
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
-        fileSet = data.get('fileSet')
+        workspace = data.get('workspace')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
-            files = doc.get(fileSet)
+            files = doc.get(workspace)
             if files:
                 sorted_keywords = get_keywords(files)
                 return jsonify(sorted_keywords), 200
