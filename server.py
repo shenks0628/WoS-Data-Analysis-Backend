@@ -75,6 +75,10 @@ def loginPage():
 def keywordPage():
     return send_file('webpage/keywordCount.html')
 
+@app.route('/test')
+def testPage():
+    return send_file('webpage/test.html')
+
 @app.route('/api/auth/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -166,11 +170,143 @@ def upload():
             doc_ref.update({
                 f'{workspace}': firestore.ArrayUnion(results)
             })
+            results = doc_ref.get().to_dict().get(workspace)
         response = {
             "message": "Upload successful",
             "files": results
         }
         return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/newWorkspace', methods=['POST'])
+def newWorkspace():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        workspace = data.get('workspace')
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            doc_ref.update({
+                f'{workspace}': []
+            })
+            workspaces = doc.keys()
+            workspaces = list(workspaces)
+            workspaces.append(workspace)
+            print(workspaces)
+            return jsonify({"message": "Workspace created", "workspace": list(workspaces)}), 200
+        return jsonify({"message": "No user found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/getWorkspace', methods=['POST'])
+def getWorkspace():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            workspaces = doc.keys()
+            print(workspaces)
+            response = {
+                "message": "Request successful",
+                "workspace": list(workspaces)
+            }
+            return jsonify(response), 200
+        return jsonify({"message": "No workspace found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/getFolder', methods=['POST'])
+def getFolder():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            print(files)
+            response = {
+                "message": "Request successful",
+                "files": files
+            }
+            return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/deleteFiles', methods=['POST'])
+def deleteFile():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        filesToDelete = data.get('files')
+        for i in range(len(filesToDelete)):
+            print(filesToDelete[i])
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            resultFiles = files[:]
+            if files:
+                for file in files:
+                    if filesToDelete.count(file.get('name')) > 0:
+                        resultFiles.remove(file)
+                doc_ref.update({
+                    f'{workspace}': resultFiles
+                })
+                return jsonify({"message": "Files deleted", "files": resultFiles}), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/deleteWorkspace', methods=['POST'])
+def deleteWorkspace():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            doc_ref.update({
+                f'{workspace}': firestore.DELETE_FIELD
+            })
+            workspaces = doc.keys()
+            workspaces = list(workspaces)
+            workspaces.remove(workspace)
+            return jsonify({"message": "Workspace deleted", "workspace": list(workspaces)}), 200
+        return jsonify({"message": "No workspace found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
