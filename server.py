@@ -173,6 +173,7 @@ def upload():
             results = doc_ref.get().to_dict().get(workspace)
         response = {
             "message": "Upload successful",
+            "count": len(results),
             "files": results
         }
         return jsonify(response), 200
@@ -200,7 +201,12 @@ def newWorkspace():
             workspaces = list(workspaces)
             workspaces.append(workspace)
             print(workspaces)
-            return jsonify({"message": "Workspace created", "workspace": list(workspaces)}), 200
+            response = {
+                "message": "Workspace created",
+                "count": len(workspaces),
+                "workspace": list(workspaces)
+            }
+            return jsonify(response), 200
         return jsonify({"message": "No user found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
@@ -222,6 +228,7 @@ def getWorkspace():
             print(workspaces)
             response = {
                 "message": "Request successful",
+                "count": len(workspaces),
                 "workspace": list(workspaces)
             }
             return jsonify(response), 200
@@ -247,6 +254,7 @@ def getFolder():
             print(files)
             response = {
                 "message": "Request successful",
+                "count": len(files),
                 "files": files
             }
             return jsonify(response), 200
@@ -280,7 +288,12 @@ def deleteFile():
                 doc_ref.update({
                     f'{workspace}': resultFiles
                 })
-                return jsonify({"message": "Files deleted", "files": resultFiles}), 200
+                response = {
+                    "message": "Files deleted",
+                    "count": len(resultFiles),
+                    "files": resultFiles
+                }
+                return jsonify(response), 200
         return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
@@ -305,7 +318,12 @@ def deleteWorkspace():
             workspaces = doc.keys()
             workspaces = list(workspaces)
             workspaces.remove(workspace)
-            return jsonify({"message": "Workspace deleted", "workspace": list(workspaces)}), 200
+            response = {
+                "message": "Workspace deleted",
+                "count": len(workspaces),
+                "workspace": list(workspaces)
+            }
+            return jsonify(response), 200
         return jsonify({"message": "No workspace found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
