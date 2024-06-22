@@ -238,6 +238,7 @@ def getWorkspace():
         doc = doc_ref.get().to_dict()
         if doc:
             workspaces = doc.keys()
+            workspaces = list(workspaces)
             print(workspaces)
             results = []
             for i in range(len(workspaces)):
