@@ -23,8 +23,8 @@ import firebase_admin
 from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
-from keywordCount import get_keywords
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
+from keywordCount import get_keywords, year
 
 app = Flask(__name__)
 CORS(app)
@@ -349,8 +349,30 @@ def deleteWorkspace():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/api/file/keywordCount', methods=['POST'])
-def keywordCount():
+# @app.route('/api/file/keywordCount', methods=['POST'])
+# def keywordCount():
+#     try:
+#         data = request.get_json()
+#         email = data.get('email')
+#         password = data.get('password')
+#         password = decrypt_string(password)
+#         user = auth.sign_in_with_email_and_password(email, password)
+#         userId = user['localId']
+#         userEmail = user['email']
+#         workspace = data.get('workspace')
+#         doc_ref = db.collection('users').document(userEmail)
+#         doc = doc_ref.get().to_dict()
+#         if doc:
+#             files = doc.get(workspace)
+#             if files:
+#                 sorted_keywords = get_keywords(files)
+#                 return jsonify(sorted_keywords), 200
+#         return jsonify({"message": "No files found"}), 404
+#     except Exception as e:
+#         return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/keywordAnalysis/year', methods=['POST'])
+def keywordAnalysisByYear():
     try:
         data = request.get_json()
         email = data.get('email')
@@ -360,13 +382,21 @@ def keywordCount():
         userId = user['localId']
         userEmail = user['email']
         workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        startYear = data.get('start')
+        endYear = data.get('end')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                sorted_keywords = get_keywords(files)
-                return jsonify(sorted_keywords), 200
+                results = year(files, filesToAnalyze, startYear, endYear)
+                print(results)
+                response = {
+                    "message": "Analysis done",
+                    "results": results
+                }
+                return jsonify(response), 200
         return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
