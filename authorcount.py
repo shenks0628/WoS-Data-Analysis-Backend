@@ -1,6 +1,7 @@
 import os
 import glob
 import requests
+
 def author(files, filesToAnalyze, start, end):
     author_count = dict()
     for file in files:
@@ -12,13 +13,13 @@ def author(files, filesToAnalyze, start, end):
         response.encoding = 'utf-8'
         content = response.text
         author = ""
-        insideAU = False
+        insideAF = False
         for line in content.split('\n'):
-            if line.startswith("AU "):
-                insideAU = True
+            if line.startswith("AF "):
+                insideAF = True
                 author += line[3:].strip()
                 author += ';'
-            elif line.startswith("   ") and insideAU:
+            elif line.startswith("   ") and insideAF:
                 author += line[3:].strip()
                 author += ';'
             elif line.startswith("PY "):
@@ -34,9 +35,9 @@ def author(files, filesToAnalyze, start, end):
                             else:
                                 author_count[word] = 1
                 author = ""
-                insideAU = False
+                insideAF = False
             else:
-                insideAU = False
+                insideAF = False
     sorted_authors = sorted(author_count.items(), key=lambda x: x[1], reverse=True)
     results = []
     cnt = 0
