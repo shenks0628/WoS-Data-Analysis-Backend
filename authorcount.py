@@ -42,12 +42,10 @@ def author(files, filesToAnalyze, start, end):
     cnt = 0
     for author in sorted_authors:
         results.append({
-            'keyword': author[0],
+            'author': author[0],
             'count': author[1]
         })
         cnt += 1
-        if cnt >= 10:
+        if cnt >= 100:
             break
-    for result in results:
-        print(f"Keyword: {result['keyword']}, Count: {result['count']}")  # 修改这里的打印语句
     return results
