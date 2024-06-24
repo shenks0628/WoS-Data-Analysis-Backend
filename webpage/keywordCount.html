@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Count</title>
+</head>
+<body>
+    <h1>Keyword Count</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <!-- 可以上傳多個 *.txt 文件 -->
+        <input type="text" id="workspace" name="workspace">
+        <button type="submit">Get Keyword</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = localStorage.getItem('email');
+            const password = localStorage.getItem('password');
+            const workspace = document.getElementById('workspace').value;
+            const data = { email: email, password: password, workspace: workspace, files: ["1.txt", "2.txt", "3.txt"], start: 1950, end: 2024 };
+
+            const response = await fetch('http://127.0.0.1:5000/api/keywordAnalysis/year', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                let x = result.results;
+                for (let i = 0; i < x.length; i++) {
+                    document.getElementById('result').innerText += x[i].keyword + ": " + x[i].count + "\n";
+                }
+                // document.getElementById('result').innerText = result;
+            }
+        });
+    </script>
+</body>
+</html>

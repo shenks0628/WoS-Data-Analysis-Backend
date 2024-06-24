@@ -5,9 +5,9 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 SECRET_SALT = os.getenv('SECRET_SALT', 'Secret Salt You Should Update')
 SECRET_PASSPHRASE = os.getenv('SECRET_PASSPHRASE', 'Secret Key You Should Update')

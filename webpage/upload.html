@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Text File</title>
+</head>
+<body>
+    <h1>Upload Text File</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <!-- 可以上傳多個 *.txt 文件 -->
+        <input type="file" id="fileInput" name="file" accept=".txt" multiple>
+        <input type="text" id="workspace" name="workspace">
+        <button type="submit">Upload</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (localStorage.getItem('email') === null) {
+                document.getElementById('result').innerText = 'Please login first';
+                return;
+            }
+            const email = localStorage.getItem('email');
+            const password = localStorage.getItem('password');
+            const workspace = document.getElementById('workspace').value;
+            const files = document.getElementById('fileInput').files;
+            if (files.length === 0) {
+                document.getElementById('result').innerText = 'Please select a file';
+                return;
+            }
+            const filesData = [];
+            for (const file of files) {
+                const fileContent = await file.text();
+                filesData.push({ name: file.name, content: fileContent });
+            }
+            const data = { email: email, password: password, workspace: workspace, files: filesData };
+            console.log(data);
+
+            const response = await fetch('http://127.0.0.1:5000/api/file/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log(result);
+            if (response.ok) {
+                document.getElementById('result').innerText = 'Upload successful';
+            }
+            else {
+                document.getElementById('result').innerText = 'Upload failed: ' + result.message;
+                // localStorage.removeItem('email');
+                // localStorage.removeItem('password');
+            }
+
+            const data2 = { email: email, password: password };
+            const response2 = await fetch('http://127.0.0.1:5000/api/file/getWorkspace', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data2)
+            });
+            const result2 = await response2.json();
+            console.log(result2);
+
+            const data3 = { email: email, password: password, workspace: workspace };
+            const response3 = await fetch('http://127.0.0.1:5000/api/file/getFolder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data3)
+            });
+            const result3 = await response3.json();
+            console.log(result3);
+        });
+    </script>
+</body>
+</html>
