@@ -422,7 +422,6 @@ def authorAnalysisByYear():
             files = doc.get(workspace)
             if files:
                 results = author(files, filesToAnalyze, startYear, endYear)
-                print(777)
                 response = {
                     "message": "Analysis done",
                     "results": results
