@@ -67,7 +67,7 @@ def year(files, filesToAnalyze, start, end):
     cnt = 0
     for keyword in sorted_keywords:
         results.append({
-            'keyword': keyword[0],
+            'author': keyword[0],
             'count': keyword[1]
         })
         cnt += 1

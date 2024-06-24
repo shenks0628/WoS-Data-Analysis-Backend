@@ -22,7 +22,7 @@
             const workspace = document.getElementById('workspace').value;
             const data = { email: email, password: password, workspace: workspace, files: ["1.txt", "2.txt", "3.txt"], start: 1950, end: 2024 };
 
-            const response = await fetch('http://127.0.0.1:5000/api/keywordAnalysis/year', {
+            const response = await fetch('http://127.0.0.1:5000/api/authorAnalysis/year', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
