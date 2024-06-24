@@ -62,6 +62,8 @@ def year(files, filesToAnalyze, start, end):
                                 keyword_count[word] = 1
                 keyword = ""
                 insideDE = False
+            else:
+                insideDE = False
     sorted_keywords = sorted(keyword_count.items(), key=lambda x: x[1], reverse=True)
     results = []
     cnt = 0
@@ -104,6 +106,8 @@ def keywordEachYear(files, filesToAnalyze, target):
                         else:
                             year_count[year] = 1
                 keyword = ""
+                insideDE = False
+            else:
                 insideDE = False
     sorted_year = sorted(year_count.items(), key=lambda x: x[0], reverse=False)
     print(sorted_year)
