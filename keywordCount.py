@@ -74,3 +74,45 @@ def year(files, filesToAnalyze, start, end):
         if cnt >= 100:
             break
     return results
+
+def keywordEachYear(files, filesToAnalyze, target):
+    year_count = dict()
+    for file in files:
+        fileName = file.get('name')
+        if fileName not in filesToAnalyze:
+            continue
+        fileURL = file.get('url')
+        response = requests.get(fileURL)
+        response.encoding = 'utf-8'
+        content = response.text
+        target = target.lower()
+        keyword = ""
+        insideDE = False
+        for line in content.split('\n'):
+            if line.startswith("DE "):
+                insideDE = True
+                keyword += line[3:].strip()
+            elif line.startswith("   ") and insideDE:
+                keyword += line[3:].strip()
+            elif line.startswith("PY "):
+                year = int(line[3:].strip())
+                if keyword != "":
+                    keyword = keyword.split(';')
+                    if target in keyword:
+                        if year_count.get(year, False):
+                            year_count[year] += 1
+                        else:
+                            year_count[year] = 1
+                keyword = ""
+                insideDE = False
+    sorted_year = sorted(year_count.items(), key=lambda x: x[0], reverse=False)
+    print(sorted_year)
+    results = []
+    for year in sorted_year:
+        results.append({
+            'year': year[0],
+            'count': year[1]
+        })
+    start = min(year_count.keys())
+    end = max(year_count.keys())
+    return start, end, results

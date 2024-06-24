@@ -24,7 +24,7 @@ from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
-from keywordCount import get_keywords, year
+from keywordCount import get_keywords, year, keywordEachYear
 
 app = Flask(__name__)
 CORS(app)
@@ -394,6 +394,36 @@ def keywordAnalysisByYear():
                 print(results)
                 response = {
                     "message": "Analysis done",
+                    "results": results
+                }
+                return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/keywordAnalysis/keyword', methods=['POST'])
+def keywordAnalysisByKeyword():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        keyword = data.get('keyword')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                start, end, results = keywordEachYear(files, filesToAnalyze, keyword)
+                response = {
+                    "message": "Analysis done",
+                    "start": start,
+                    "end": end,
                     "results": results
                 }
                 return jsonify(response), 200
