@@ -23,8 +23,8 @@ import firebase_admin
 from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
-from keywordCount import get_keywords
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
+from keywordCount import get_keywords, year, keywordEachYear
 
 app = Flask(__name__)
 CORS(app)
@@ -173,6 +173,7 @@ def upload():
             results = doc_ref.get().to_dict().get(workspace)
         response = {
             "message": "Upload successful",
+            "count": len(results),
             "files": results
         }
         return jsonify(response), 200
@@ -186,21 +187,39 @@ def newWorkspace():
         email = data.get('email')
         password = data.get('password')
         password = decrypt_string(password)
-        workspace = data.get('workspace')
+        name = data.get('name')
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
-            doc_ref.update({
-                f'{workspace}': []
-            })
             workspaces = doc.keys()
             workspaces = list(workspaces)
-            workspaces.append(workspace)
+            if name not in workspaces:
+                workspaces.append(name)
+            else:
+                return jsonify({"message": "Workspace already exists"}), 400
+            doc_ref.update({
+                f'{name}': []
+            })
             print(workspaces)
-            return jsonify({"message": "Workspace created", "workspace": list(workspaces)}), 200
+            results = []
+            for i in range(len(workspaces)):
+                if workspaces[i] == name:
+                    cnt = 0
+                else:
+                    cnt = len(doc.get(workspaces[i]))
+                results.append({
+                    'name': workspaces[i],
+                    'count': cnt
+                })
+            response = {
+                "message": "Workspace created",
+                "count": len(results),
+                "workspace": results
+            }
+            return jsonify(response), 200
         return jsonify({"message": "No user found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
@@ -219,10 +238,19 @@ def getWorkspace():
         doc = doc_ref.get().to_dict()
         if doc:
             workspaces = doc.keys()
+            workspaces = list(workspaces)
             print(workspaces)
+            results = []
+            for i in range(len(workspaces)):
+                cnt = len(doc.get(workspaces[i]))
+                results.append({
+                    'name': workspaces[i],
+                    'count': cnt
+                })
             response = {
                 "message": "Request successful",
-                "workspace": list(workspaces)
+                "count": len(results),
+                "workspace": results
             }
             return jsonify(response), 200
         return jsonify({"message": "No workspace found"}), 404
@@ -247,6 +275,7 @@ def getFolder():
             print(files)
             response = {
                 "message": "Request successful",
+                "count": len(files),
                 "files": files
             }
             return jsonify(response), 200
@@ -280,7 +309,12 @@ def deleteFile():
                 doc_ref.update({
                     f'{workspace}': resultFiles
                 })
-                return jsonify({"message": "Files deleted", "files": resultFiles}), 200
+                response = {
+                    "message": "Files deleted",
+                    "count": len(resultFiles),
+                    "files": resultFiles
+                }
+                return jsonify(response), 200
         return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
@@ -305,13 +339,40 @@ def deleteWorkspace():
             workspaces = doc.keys()
             workspaces = list(workspaces)
             workspaces.remove(workspace)
-            return jsonify({"message": "Workspace deleted", "workspace": list(workspaces)}), 200
+            response = {
+                "message": "Workspace deleted",
+                "count": len(workspaces),
+                "workspace": list(workspaces)
+            }
+            return jsonify(response), 200
         return jsonify({"message": "No workspace found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/api/file/keywordCount', methods=['POST'])
-def keywordCount():
+# @app.route('/api/file/keywordCount', methods=['POST'])
+# def keywordCount():
+#     try:
+#         data = request.get_json()
+#         email = data.get('email')
+#         password = data.get('password')
+#         password = decrypt_string(password)
+#         user = auth.sign_in_with_email_and_password(email, password)
+#         userId = user['localId']
+#         userEmail = user['email']
+#         workspace = data.get('workspace')
+#         doc_ref = db.collection('users').document(userEmail)
+#         doc = doc_ref.get().to_dict()
+#         if doc:
+#             files = doc.get(workspace)
+#             if files:
+#                 sorted_keywords = get_keywords(files)
+#                 return jsonify(sorted_keywords), 200
+#         return jsonify({"message": "No files found"}), 404
+#     except Exception as e:
+#         return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/keywordAnalysis/year', methods=['POST'])
+def keywordAnalysisByYear():
     try:
         data = request.get_json()
         email = data.get('email')
@@ -321,13 +382,51 @@ def keywordCount():
         userId = user['localId']
         userEmail = user['email']
         workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        startYear = data.get('start')
+        endYear = data.get('end')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                sorted_keywords = get_keywords(files)
-                return jsonify(sorted_keywords), 200
+                results = year(files, filesToAnalyze, startYear, endYear)
+                print(results)
+                response = {
+                    "message": "Analysis done",
+                    "results": results
+                }
+                return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/keywordAnalysis/keyword', methods=['POST'])
+def keywordAnalysisByKeyword():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        keyword = data.get('keyword')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                start, end, results = keywordEachYear(files, filesToAnalyze, keyword)
+                response = {
+                    "message": "Analysis done",
+                    "start": start,
+                    "end": end,
+                    "results": results
+                }
+                return jsonify(response), 200
         return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
