@@ -32,19 +32,21 @@ def get_references(files):
                 ti += line[3:].strip()
             elif line.startswith("SO "):
                 insideTI = False
-            elif line.startswith("Z9 "):
-                ref_cnt = int(line[3:].strip())
+            if line.startswith("Z9 "):
                 TI.add(ti)
                 if ti != "":
                     if reference_count.get(ti, False):
-                        reference_count[ti]["reference"] += ref_cnt
+                        reference_count[ti]["count"] += ref_cnt
                         reference_count[ti]["author"] = author
                     else:
                         reference_count[ti] = dict()
-                        reference_count[ti]["reference"] = ref_cnt
+                        reference_count[ti]["title"] = ti
+                        reference_count[ti]["count"] = ref_cnt
                         reference_count[ti]["author"] = author
                 ti = ""
                 author = []
                 ref_cnt = 0
+                insideTI = False
+
     sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['reference'], reverse=True)
     return sorted_references
