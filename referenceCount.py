@@ -2,7 +2,7 @@ import os
 import glob
 import requests
 
-def get_references(files):
+def get_referencesInfo(files):
     TI = set()
     reference_count = dict()
     for file in files:
