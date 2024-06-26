@@ -24,7 +24,7 @@ from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
-from keywordCount import get_keywords, year, keywordEachYear
+from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
@@ -434,6 +434,34 @@ def keywordAnalysisByYear():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
+@app.route('/api/keywordAnalysis/occurence', methods=['POST'])
+def keywordAnalysisByOccurence():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        threshold = data.get('threshold')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                results = keywordOccurence(files, filesToAnalyze, threshold)
+                response = {
+                    "message": "Analysis done",
+                    "results": results
+                }
+                return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+
 @app.route('/api/keywordAnalysis/keyword', methods=['POST'])
 def keywordAnalysisByKeyword():
     try:
