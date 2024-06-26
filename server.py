@@ -26,6 +26,7 @@ from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 from keywordCount import get_keywords, year, keywordEachYear
 from authorcount import author
+from referenceCount import get_referencesInfo
 
 app = Flask(__name__)
 CORS(app)
@@ -461,5 +462,31 @@ def authorAnalysisByYear():
     except Exception as e:
         return jsonify({"message": str(e)}), 400 
 
+@app.route('/api/referenceCountAnalysis/generalInfo', methods=['POST'])
+def referenceCountAnalysisGetGeneralInfo():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                results = get_referencesInfo(files)
+                response = {
+                    "message": "Analysis done",
+                    "results": results
+                }
+                return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
 if __name__ == '__main__':
     app.run(port=5000)
