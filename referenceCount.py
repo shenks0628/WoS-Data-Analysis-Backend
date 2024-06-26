@@ -50,11 +50,13 @@ def get_referencesInfo(files):
                 insideTI = False
 
     sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['count'], reverse=True)
+
     results = []
     for item in sorted_references:
         results.append({
             "title": item[1]["title"],
-            "count": item[1]["count"],
-            "author": item[1]["author"]
+            "author": item[1]["author"],
+            "count": item[1]["count"]
         })
+        
     return results
