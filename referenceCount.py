@@ -49,5 +49,5 @@ def get_referencesInfo(files):
                 ref_cnt = 0
                 insideTI = False
 
-    sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['reference'], reverse=True)
+    sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['count'], reverse=True)
     return sorted_references
