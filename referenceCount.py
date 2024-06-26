@@ -33,12 +33,13 @@ def get_referencesInfo(files):
             elif line.startswith("SO "):
                 insideTI = False
             if line.startswith("Z9 "):
-                TI.add(ti)
+                ref_cnt = int(line[3:].strip())
                 if ti != "":
                     if reference_count.get(ti, False):
                         reference_count[ti]["count"] += ref_cnt
                         reference_count[ti]["author"] = author
                     else:
+                        TI.add(ti)
                         reference_count[ti] = dict()
                         reference_count[ti]["title"] = ti
                         reference_count[ti]["count"] = ref_cnt
