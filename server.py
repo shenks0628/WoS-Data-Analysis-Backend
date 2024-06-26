@@ -27,6 +27,7 @@ from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 from keywordCount import get_keywords, year, keywordEachYear
 from authorcount import author
 from referenceCount import get_referencesInfo
+from checkWarning import checkTitle
 
 app = Flask(__name__)
 CORS(app)
@@ -348,6 +349,36 @@ def deleteWorkspace():
             }
             return jsonify(response), 200
         return jsonify({"message": "No workspace found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/file/warning', methods=['POST'])
+def warning():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        workspace = data.get('workspace')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, results = checkTitle(files)
+                if results == []:
+                    return jsonify({"message": "No warnings found", "count": count}), 200
+                else:
+                    response = {
+                        "message": "Warnings found",
+                        "count": count,
+                        "results": results
+                    }
+                    return jsonify(response), 200
+        return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
