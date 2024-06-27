@@ -140,6 +140,15 @@ def keywordOccurence(files, filesToAnalyze, threshold):
             elif line.startswith("   ") and insideDE:
                 keyword += line[3:].strip()
             else:
+                if keyword != "":
+                    keyword = keyword.split(';')
+                    for word in keyword:
+                        word = word.strip().lower()
+                        if keyword_count.get(word, False):
+                            keyword_count[word] += 1
+                        else:
+                            keyword_count[word] = 1
+                keyword = ""
                 insideDE = False
     sorted_keywords = sorted(keyword_count.items(), key=lambda x: x[1], reverse=True)
     results = []
