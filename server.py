@@ -515,9 +515,11 @@ def authorAnalysisByYear():
         if doc:
             files = doc.get(workspace)
             if files:
-                results = author(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = author(files, filesToAnalyze, startYear, endYear)
                 response = {
                     "message": "Analysis done",
+                    "count": count,
+                    "conditionCount": conditionCount,
                     "results": results
                 }
                 return jsonify(response), 200
