@@ -32,6 +32,8 @@ def get_keywords(files):
     return sorted_keywords
 
 def year(files, filesToAnalyze, start, end):
+    count = 0
+    conditionCount = 0
     keyword_count = dict()
     for file in files:
         fileName = file.get('name')
@@ -46,6 +48,7 @@ def year(files, filesToAnalyze, start, end):
         for line in content.split('\n'):
             if line.startswith("DE "):
                 insideDE = True
+                count += 1
                 keyword += line[3:].strip()
             elif line.startswith("   ") and insideDE:
                 keyword += line[3:].strip()
@@ -53,6 +56,7 @@ def year(files, filesToAnalyze, start, end):
                 year = int(line[3:].strip())
                 if year >= start and year <= end:
                     if keyword != "":
+                        conditionCount += 1
                         keyword = keyword.split(';')
                         for word in keyword:
                             word = word.strip().lower()
@@ -75,9 +79,11 @@ def year(files, filesToAnalyze, start, end):
         cnt += 1
         if cnt >= 100:
             break
-    return results
+    return count, conditionCount, results
 
 def keywordEachYear(files, filesToAnalyze, target):
+    count = 0
+    conditionCount = 0
     year_count = dict()
     for file in files:
         fileName = file.get('name')
@@ -92,6 +98,7 @@ def keywordEachYear(files, filesToAnalyze, target):
         insideDE = False
         for line in content.split('\n'):
             if line.startswith("DE "):
+                count += 1
                 insideDE = True
                 keyword += line[3:].strip()
             elif line.startswith("   ") and insideDE:
@@ -101,6 +108,7 @@ def keywordEachYear(files, filesToAnalyze, target):
                 if keyword != "":
                     keyword = keyword.split(';')
                     if target in keyword:
+                        conditionCount += 1
                         if year_count.get(year, False):
                             year_count[year] += 1
                         else:
@@ -119,7 +127,7 @@ def keywordEachYear(files, filesToAnalyze, target):
         })
     start = min(year_count.keys())
     end = max(year_count.keys())
-    return start, end, results
+    return count, conditionCount, start, end, results
 
 def keywordOccurence(files, filesToAnalyze, threshold):
     keyword_count = dict()

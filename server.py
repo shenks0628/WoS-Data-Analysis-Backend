@@ -423,10 +423,12 @@ def keywordAnalysisByYear():
         if doc:
             files = doc.get(workspace)
             if files:
-                results = year(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = year(files, filesToAnalyze, startYear, endYear)
                 print(results)
                 response = {
                     "message": "Analysis done",
+                    "count": count,
+                    "conditionCount": conditionCount,
                     "results": results
                 }
                 return jsonify(response), 200
@@ -480,9 +482,11 @@ def keywordAnalysisByKeyword():
         if doc:
             files = doc.get(workspace)
             if files:
-                start, end, results = keywordEachYear(files, filesToAnalyze, keyword)
+                count, conditionCount, start, end, results = keywordEachYear(files, filesToAnalyze, keyword)
                 response = {
                     "message": "Analysis done",
+                    "count": count,
+                    "conditionCount": conditionCount,
                     "start": start,
                     "end": end,
                     "results": results
