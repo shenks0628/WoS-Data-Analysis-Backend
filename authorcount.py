@@ -2,6 +2,8 @@ import os
 import glob
 import requests
 def author(files, filesToAnalyze, start, end):
+    count = 0
+    conditionCount = 0
     author_count = dict()
     for file in files:
         fileName = file.get('name')
@@ -14,7 +16,9 @@ def author(files, filesToAnalyze, start, end):
         author = ""
         insideAU = False
         for line in content.split('\n'):
-            if line.startswith("AU "):
+            if line.startswith("DE "):
+                count+=1
+            elif line.startswith("AU "):
                 insideAU = True
                 author += line[3:].strip()
                 author += ';'
@@ -25,6 +29,7 @@ def author(files, filesToAnalyze, start, end):
                 year = int(line[3:].strip())
                 if year >= start and year <= end:
                     if author != "":
+                        conditionCount+=1
                         author = author.strip(';')
                         author = author.split(';')
                         for word in author:
@@ -48,6 +53,8 @@ def author(files, filesToAnalyze, start, end):
         cnt += 1
         if cnt >= 10:
             break
+    print(count)
+    print(conditionCount)
     for result in results:
         print(f"Keyword: {result['keyword']}, Count: {result['count']}")  # 修改这里的打印语句
-    return results
+    return count, conditionCount, results

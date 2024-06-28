@@ -12,6 +12,8 @@
         <input type="text" id="workspace" name="workspace">
         <button type="submit">Get Keyword</button>
     </form>
+    <div id="count"></div>
+    <div id="conditionCount"></div>
     <div id="result"></div>
 
     <script>
@@ -20,7 +22,14 @@
             const email = localStorage.getItem('email');
             const password = localStorage.getItem('password');
             const workspace = document.getElementById('workspace').value;
-            const data = { email: email, password: password, workspace: workspace, files: ["1.txt", "2.txt", "3.txt"], start: 1950, end: 2024 };
+            const data = { 
+                email: email, 
+                password: password, 
+                workspace: workspace, 
+                files: ["1.txt", "2.txt", "3.txt"], 
+                start: 1950, 
+                end: 2024 
+            };
 
             const response = await fetch('http://127.0.0.1:5000/api/authorAnalysis/year', {
                 method: 'POST',
@@ -32,11 +41,17 @@
 
             const result = await response.json();
             if (response.ok) {
+                document.getElementById('count').innerText = "Count: " + result.count;
+                document.getElementById('conditionCount').innerText = "Condition Count: " + result.conditionCount;
+
                 let x = result.results;
+                let resultText = "";
                 for (let i = 0; i < x.length; i++) {
-                    document.getElementById('result').innerText += x[i].keyword + ": " + x[i].count + "\n";
+                    resultText += x[i].keyword + ": " + x[i].count + "\n";
                 }
-                // document.getElementById('result').innerText = result;
+                document.getElementById('result').innerText = resultText;
+            } else {
+                document.getElementById('result').innerText = "Error: " + result.message;
             }
         });
     </script>
