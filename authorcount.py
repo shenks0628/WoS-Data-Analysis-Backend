@@ -3,6 +3,8 @@ import glob
 import requests
 
 def author(files, filesToAnalyze, start, end):
+    count = 0
+    conditionCount = 0
     author_count = dict()
     for file in files:
         fileName = file.get('name')
@@ -15,7 +17,9 @@ def author(files, filesToAnalyze, start, end):
         author = ""
         insideAF = False
         for line in content.split('\n'):
-            if line.startswith("AF "):
+            if line.startswith("TI "):
+                count+=1
+            elif line.startswith("AF "):
                 insideAF = True
                 author += line[3:].strip()
                 author += ';'
@@ -26,6 +30,7 @@ def author(files, filesToAnalyze, start, end):
                 year = int(line[3:].strip())
                 if year >= start and year <= end:
                     if author != "":
+                        conditionCount+=1
                         author = author.strip(';')
                         author = author.split(';')
                         for word in author:
@@ -49,4 +54,4 @@ def author(files, filesToAnalyze, start, end):
         cnt += 1
         if cnt >= 100:
             break
-    return results
+    return count, conditionCount, results
