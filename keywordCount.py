@@ -46,9 +46,10 @@ def year(files, filesToAnalyze, start, end):
         keyword = ""
         insideDE = False
         for line in content.split('\n'):
-            if line.startswith("DE "):
-                insideDE = True
+            if line.startswith("TI "):
                 count += 1
+            elif line.startswith("DE "):
+                insideDE = True
                 keyword += line[3:].strip()
             elif line.startswith("   ") and insideDE:
                 keyword += line[3:].strip()
@@ -97,8 +98,9 @@ def keywordEachYear(files, filesToAnalyze, target):
         keyword = ""
         insideDE = False
         for line in content.split('\n'):
-            if line.startswith("DE "):
+            if line.startswith("TI "):
                 count += 1
+            elif line.startswith("DE "):
                 insideDE = True
                 keyword += line[3:].strip()
             elif line.startswith("   ") and insideDE:
@@ -145,7 +147,7 @@ def keywordOccurence(files, filesToAnalyze, threshold):
         for line in content.split('\n'):
             if line.startswith("TI "):
                 titleCount += 1
-            if line.startswith("DE "):
+            elif line.startswith("DE "):
                 insideDE = True
                 keyword += line[3:].strip()
             elif line.startswith("   ") and insideDE:
