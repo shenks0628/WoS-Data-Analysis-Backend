@@ -454,9 +454,10 @@ def keywordAnalysisByOccurence():
         if doc:
             files = doc.get(workspace)
             if files:
-                results = keywordOccurence(files, filesToAnalyze, threshold)
+                count, results = keywordOccurence(files, filesToAnalyze, threshold)
                 response = {
                     "message": "Analysis done",
+                    "count": count,
                     "results": results
                 }
                 return jsonify(response), 200
