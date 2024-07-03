@@ -5,6 +5,7 @@ import requests
 def get_referencesInfo(files):
     TI = set()
     reference_count = dict()
+    count = 0
     for file in files:
         fileURL = file.get('url')
         response = requests.get(fileURL)
@@ -27,11 +28,13 @@ def get_referencesInfo(files):
             # starts of a title
             if line.startswith("TI "):
                 insideTI = True
+                count += 1
                 ti += line[3:].strip()
             elif line.startswith("   ") and insideTI:
                 ti += line[3:].strip()
-            elif line.startswith("SO "):
+            else:
                 insideTI = False
+            
             if line.startswith("Z9 "):
                 ref_cnt = int(line[3:].strip())
                 if ti != "":
@@ -59,4 +62,4 @@ def get_referencesInfo(files):
             "count": item[1]["count"]
         })
         
-    return results
+    return count, results

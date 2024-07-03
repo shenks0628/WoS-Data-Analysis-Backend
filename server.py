@@ -618,10 +618,11 @@ def analyzeReferenceCountGetGeneralInfo(data):
         if doc:
             files = doc.get(workspace)
             if files:
-                results = get_referencesInfo(files)
+                count, results = get_referencesInfo(files)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/referenceCountAnalysis/generalInfo",
+                    "count": count,
                     "results": results
                 }
                 analysisResults[userEmail] = response
