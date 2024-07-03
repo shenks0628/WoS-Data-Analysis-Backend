@@ -19,6 +19,7 @@ def author(files, filesToAnalyze, start, end):
         for line in content.split('\n'):
             if line.startswith("TI "):
                 count+=1
+                insideAF = False
             elif line.startswith("AF "):
                 insideAF = True
                 author += line[3:].strip()

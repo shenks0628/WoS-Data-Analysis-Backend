@@ -58,6 +58,9 @@ firebaseConfig = {
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
+analysisResults = dict()
+analysisRequests = set()
+
 @app.route('/')
 def home():
     return "Hello, World!"
@@ -381,31 +384,36 @@ def warning():
         return jsonify({"message": "No files found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
-    
-# @app.route('/api/file/keywordCount', methods=['POST'])
-# def keywordCount():
+
+# def test(data):
 #     try:
-#         data = request.get_json()
 #         email = data.get('email')
 #         password = data.get('password')
 #         password = decrypt_string(password)
 #         user = auth.sign_in_with_email_and_password(email, password)
 #         userId = user['localId']
 #         userEmail = user['email']
+#         # analysisRequests.add(userEmail)
 #         workspace = data.get('workspace')
 #         doc_ref = db.collection('users').document(userEmail)
 #         doc = doc_ref.get().to_dict()
 #         if doc:
 #             files = doc.get(workspace)
-#             if files:
-#                 sorted_keywords = get_keywords(files)
-#                 return jsonify(sorted_keywords), 200
-#         return jsonify({"message": "No files found"}), 404
+#             print(files)
+#             analysisResults[userEmail] = files
 #     except Exception as e:
-#         return jsonify({"message": str(e)}), 400
+#         analysisResults[userEmail] = e
+
     
-@app.route('/api/keywordAnalysis/year', methods=['POST'])
-def keywordAnalysisByYear():
+# @app.route('/api/file/keywordCount', methods=['POST'])
+# def keywordCount():
+#     data = request.get_json()
+#     thread = threading.Thread(target=test, args=(data,))
+#     thread.start()
+#     return jsonify({"message": "Running"}), 200
+
+@app.route('/api/getResult', methods=['POST'])
+def getResult():
     try:
         data = request.get_json()
         email = data.get('email')
@@ -414,6 +422,32 @@ def keywordAnalysisByYear():
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
+        if userEmail in analysisRequests:
+            if analysisResults.get(userEmail):
+                result = analysisResults[userEmail]
+                analysisRequests.remove(userEmail)
+                analysisResults.pop(userEmail)
+                if isinstance(result, Exception):
+                    return jsonify({"message": str(result)}), 400
+                elif result == "No files found":
+                    return jsonify({"message": "No files found"}), 404
+                return jsonify(result), 200
+            else:
+                return jsonify({"message": "Still analyzing"}), 400
+        else:
+            return jsonify({"message": "No analysis request found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+
+def analyzeKeywordByYear(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
         workspace = data.get('workspace')
         filesToAnalyze = data.get('files')
         startYear = data.get('start')
@@ -427,25 +461,35 @@ def keywordAnalysisByYear():
                 print(results)
                 response = {
                     "message": "Analysis done",
+                    "api": "/api/keywordAnalysis/year",
                     "count": count,
                     "conditionCount": conditionCount,
                     "results": results
                 }
-                return jsonify(response), 200
-        return jsonify({"message": "No files found"}), 404
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
     except Exception as e:
-        return jsonify({"message": str(e)}), 400
+        analysisResults[userEmail] = e
     
-@app.route('/api/keywordAnalysis/occurence', methods=['POST'])
-def keywordAnalysisByOccurence():
+@app.route('/api/keywordAnalysis/year', methods=['POST'])
+def keywordAnalysisByYear():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeKeywordByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def analyzeKeywordByOccurence(data):
     try:
-        data = request.get_json()
         email = data.get('email')
         password = data.get('password')
         password = decrypt_string(password)
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
+        analysisRequests.add(userEmail)
         workspace = data.get('workspace')
         filesToAnalyze = data.get('files')
         threshold = data.get('threshold')
@@ -457,24 +501,34 @@ def keywordAnalysisByOccurence():
                 count, results = keywordOccurence(files, filesToAnalyze, threshold)
                 response = {
                     "message": "Analysis done",
+                    "api": "/api/keywordAnalysis/occurence",
                     "count": count,
                     "results": results
                 }
-                return jsonify(response), 200
-        return jsonify({"message": "No files found"}), 404
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
     except Exception as e:
-        return jsonify({"message": str(e)}), 400
+        analysisResults[userEmail] = e
+    
+@app.route('/api/keywordAnalysis/occurence', methods=['POST'])
+def keywordAnalysisByOccurence():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeKeywordByOccurence, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
 
-@app.route('/api/keywordAnalysis/keyword', methods=['POST'])
-def keywordAnalysisByKeyword():
+def analyzeKeywordByKeyword(data):
     try:
-        data = request.get_json()
         email = data.get('email')
         password = data.get('password')
         password = decrypt_string(password)
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
+        analysisRequests.add(userEmail)
         workspace = data.get('workspace')
         filesToAnalyze = data.get('files')
         keyword = data.get('keyword')
@@ -486,27 +540,37 @@ def keywordAnalysisByKeyword():
                 count, conditionCount, start, end, results = keywordEachYear(files, filesToAnalyze, keyword)
                 response = {
                     "message": "Analysis done",
+                    "api": "/api/keywordAnalysis/keyword",
                     "count": count,
                     "conditionCount": conditionCount,
                     "start": start,
                     "end": end,
                     "results": results
                 }
-                return jsonify(response), 200
-        return jsonify({"message": "No files found"}), 404
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
     except Exception as e:
-        return jsonify({"message": str(e)}), 400
-    
-@app.route('/api/authorAnalysis/year', methods=['POST'])
-def authorAnalysisByYear():
+        analysisResults[userEmail] = e
+
+@app.route('/api/keywordAnalysis/keyword', methods=['POST'])
+def keywordAnalysisByKeyword():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeKeywordByKeyword, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def analyzeAuthorByYear(data):
     try:
-        data = request.get_json()
         email = data.get('email')
         password = data.get('password')
         password = decrypt_string(password)
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
+        analysisRequests.add(userEmail)
         workspace = data.get('workspace')
         filesToAnalyze = data.get('files')
         startYear = data.get('start')
@@ -519,25 +583,35 @@ def authorAnalysisByYear():
                 count, conditionCount, results = author(files, filesToAnalyze, startYear, endYear)
                 response = {
                     "message": "Analysis done",
+                    "api": "/api/authorAnalysis/year",
                     "count": count,
                     "conditionCount": conditionCount,
                     "results": results
                 }
-                return jsonify(response), 200
-        return jsonify({"message": "No files found"}), 404
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
     except Exception as e:
-        return jsonify({"message": str(e)}), 400 
+        analysisResults[userEmail] = e
 
-@app.route('/api/referenceCountAnalysis/generalInfo', methods=['POST'])
-def referenceCountAnalysisGetGeneralInfo():
+@app.route('/api/authorAnalysis/year', methods=['POST'])
+def authorAnalysisByYear():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeAuthorByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def analyzeReferenceCountGetGeneralInfo(data):
     try:
-        data = request.get_json()
         email = data.get('email')
         password = data.get('password')
         password = decrypt_string(password)
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
+        analysisRequests.add(userEmail)
         workspace = data.get('workspace')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
@@ -547,12 +621,23 @@ def referenceCountAnalysisGetGeneralInfo():
                 results = get_referencesInfo(files)
                 response = {
                     "message": "Analysis done",
+                    "api": "/api/referenceCountAnalysis/generalInfo",
                     "results": results
                 }
-                return jsonify(response), 200
-        return jsonify({"message": "No files found"}), 404
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
     except Exception as e:
-        return jsonify({"message": str(e)}), 400
+        analysisResults[userEmail] = e
+
+@app.route('/api/referenceCountAnalysis/generalInfo', methods=['POST'])
+def referenceCountAnalysisGetGeneralInfo():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeReferenceCountGetGeneralInfo, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
     
 if __name__ == '__main__':
     app.run(port=5000)
