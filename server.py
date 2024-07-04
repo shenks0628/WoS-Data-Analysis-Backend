@@ -613,12 +613,13 @@ def analyzeReferenceCountGetGeneralInfo(data):
         userEmail = user['email']
         analysisRequests.add(userEmail)
         workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                count, results = get_referencesInfo(files)
+                count, results = get_referencesInfo(files, filesToAnalyze)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/referenceCountAnalysis/generalInfo",

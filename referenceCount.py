@@ -2,11 +2,14 @@ import os
 import glob
 import requests
 
-def get_referencesInfo(files):
+def get_referencesInfo(files, filesToAnalyze):
     TI = set()
     reference_count = dict()
     count = 0
     for file in files:
+        fileName = file.get('name')
+        if fileName not in filesToAnalyze:
+            continue
         fileURL = file.get('url')
         response = requests.get(fileURL)
         response.encoding = 'utf-8'
