@@ -108,6 +108,7 @@ def keywordEachYear(files, filesToAnalyze, target):
             elif line.startswith("PY "):
                 year = int(line[3:].strip())
                 if keyword != "":
+                    keyword = keyword.lower()
                     keyword = keyword.split(';')
                     if target in keyword:
                         conditionCount += 1
