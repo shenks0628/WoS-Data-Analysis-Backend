@@ -464,7 +464,13 @@ def analyzeKeywordByYear(data):
                     "api": "/api/keywordAnalysis/year",
                     "count": count,
                     "conditionCount": conditionCount,
-                    "results": results
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "start": startYear,
+                        "end": endYear
+                    }
                 }
                 analysisResults[userEmail] = response
             else:
@@ -503,7 +509,12 @@ def analyzeKeywordByOccurence(data):
                     "message": "Analysis done",
                     "api": "/api/keywordAnalysis/occurence",
                     "count": count,
-                    "results": results
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "threshold": threshold
+                    }
                 }
                 analysisResults[userEmail] = response
             else:
@@ -545,7 +556,12 @@ def analyzeKeywordByKeyword(data):
                     "conditionCount": conditionCount,
                     "start": start,
                     "end": end,
-                    "results": results
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "keyword": keyword
+                    }
                 }
                 analysisResults[userEmail] = response
             else:
@@ -586,7 +602,13 @@ def analyzeAuthorByYear(data):
                     "api": "/api/authorAnalysis/year",
                     "count": count,
                     "conditionCount": conditionCount,
-                    "results": results
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "start": startYear,
+                        "end": endYear
+                    }
                 }
                 analysisResults[userEmail] = response
             else:
@@ -624,7 +646,11 @@ def analyzeReferenceCountGetGeneralInfo(data):
                     "message": "Analysis done",
                     "api": "/api/referenceCountAnalysis/generalInfo",
                     "count": count,
-                    "results": results
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze
+                    }
                 }
                 analysisResults[userEmail] = response
             else:
