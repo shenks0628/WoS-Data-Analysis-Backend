@@ -30,8 +30,7 @@
                 start: 1950, 
                 end: 2024 
             };
-
-            const response = await fetch('http://127.0.0.1:5000/api/authorAnalysis/year', {
+            const response = await fetch('http://127.0.0.1:5000/api/fieldAnalysis/year', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -47,7 +46,7 @@
                 let x = result.results;
                 let resultText = "";
                 for (let i = 0; i < x.length; i++) {
-                    resultText += x[i].keyword + ": " + x[i].count + "\n";
+                    resultText += x[i].fieldAnalysis + ": " + x[i].count + "\n";
                 }
                 document.getElementById('result').innerText = resultText;
             } else {

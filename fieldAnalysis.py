@@ -1,7 +1,7 @@
 import os
 import glob
 import requests
-def fieldAnalysis(files, filesToAnalyze, start, end):
+def fieldAnalysisyear(files, filesToAnalyze, start, end):
     count = 0
     conditionCount = 0
     fieldAnalysis_count = dict()
@@ -21,13 +21,10 @@ def fieldAnalysis(files, filesToAnalyze, start, end):
             elif line.startswith("SC "):
                 insideSC = True
                 fieldAnalysis += line[3:].strip()
-                fieldAnalysis += ';'
             elif line.startswith("   ") and insideSC:
                 fieldAnalysis += line[3:].strip()
-                fieldAnalysis += ';'
             elif line.startswith("PY "):
                 year = int(line[3:].strip())
-                insideSC = False
             else:
                 if insideSC:
                     if year >= start and year <= end:

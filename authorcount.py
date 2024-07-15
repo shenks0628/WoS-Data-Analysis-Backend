@@ -16,7 +16,7 @@ def author(files, filesToAnalyze, start, end):
         author = ""
         insideAU = False
         for line in content.split('\n'):
-            if line.startswith("DE "):
+            if line.startswith("TI "):
                 count+=1
             elif line.startswith("AU "):
                 insideAU = True
