@@ -689,7 +689,7 @@ def analyzefieldByYear(data):
                 count, conditionCount, results = fieldAnalysisyear(files, filesToAnalyze, startYear, endYear)
                 response = {
                     "message": "Analysis done",
-                    "api": "/api/authorAnalysis/year",
+                    "api": "/api/fieldAnalysis/year",
                     "count": count,
                     "conditionCount": conditionCount,
                     "results": results,
