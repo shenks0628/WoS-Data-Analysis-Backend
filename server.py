@@ -25,6 +25,7 @@ import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
+from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
@@ -712,6 +713,144 @@ def analyzefieldByYear(data):
 def fieldAnalysisByYear():
     data = request.get_json()
     thread = threading.Thread(target=analyzefieldByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def NLPAnalyzeKeywordByYear(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        startYear = data.get('start')
+        endYear = data.get('end')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, conditionCount, results = NLPonYear(files, filesToAnalyze, startYear, endYear)
+                response = {
+                    "message": "Analysis done",
+                    "api": "/api/NLPKA/year",
+                    "count": count,
+                    "conditionCount": conditionCount,
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "start": startYear,
+                        "end": endYear
+                    }
+                }
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
+    except Exception as e:
+        analysisResults[userEmail] = e
+
+@app.route('/api/NLPKA/year', methods=['POST'])
+def NLPKeywordAnalysisByYear():
+    data = request.get_json()
+    thread = threading.Thread(target=NLPAnalyzeKeywordByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def NLPAnalyzeKeywordByOccurence(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        threshold = data.get('threshold')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, results = NLPonKeywordByOccurence(files, filesToAnalyze, threshold)
+                response = {
+                    "message": "Analysis done",
+                    "api": "/api/NLPKA/occurence",
+                    "count": count,
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "threshold": threshold
+                    }
+                }
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
+    except Exception as e:
+        analysisResults[userEmail] = e
+
+@app.route('/api/NLPKA/occurence', methods=['POST'])
+def NLPKeywordAnalysisByOccurence():
+    data = request.get_json()
+    thread = threading.Thread(target=NLPAnalyzeKeywordByOccurence, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def NLPAnalyzeKeywordByKeyword(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        keyword = data.get('keyword')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, conditionCount, start, end, results = NLPonKeywordEachYear(files, filesToAnalyze, keyword)
+                response = {
+                    "message": "Analysis done",
+                    "api": "/api/NLPKA/keyword",
+                    "count": count,
+                    "conditionCount": conditionCount,
+                    "start": start,
+                    "end": end,
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "keyword": keyword
+                    }
+                }
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
+    except Exception as e:
+        analysisResults[userEmail] = e
+
+@app.route('/api/NLPKA/keyword', methods=['POST'])
+def NLPKeywordAnalysisByKeyword():
+    data = request.get_json()
+    thread = threading.Thread(target=NLPAnalyzeKeywordByKeyword, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
