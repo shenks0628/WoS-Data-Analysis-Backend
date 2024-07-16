@@ -28,6 +28,7 @@ from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
+from fieldAnalysisCount import fieldAnalysisyear
 
 app = Flask(__name__)
 CORS(app)
@@ -666,6 +667,53 @@ def referenceCountAnalysisGetGeneralInfo():
     thread = threading.Thread(target=analyzeReferenceCountGetGeneralInfo, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
-    
+
+def analyzefieldByYear(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        startYear = data.get('start')
+        endYear = data.get('end')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, conditionCount, results = fieldAnalysisyear(files, filesToAnalyze, startYear, endYear)
+                response = {
+                    "message": "Analysis done",
+                    "api": "/api/fieldAnalysis/year",
+                    "count": count,
+                    "conditionCount": conditionCount,
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "start": startYear,
+                        "end": endYear
+                    }
+                }
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
+    except Exception as e:
+        analysisResults[userEmail] = e
+
+@app.route('/api/fieldAnalysis/year', methods=['POST'])
+def fieldAnalysisByYear():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzefieldByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
 if __name__ == '__main__':
     app.run(port=5000)
