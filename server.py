@@ -29,7 +29,7 @@ from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOc
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
-from fieldAnalysisCount import fieldAnalysisyear, fieldOccurence
+from fieldAnalysisCount import fieldEachYear, fieldOccurence
 
 app = Flask(__name__)
 CORS(app)
@@ -687,7 +687,7 @@ def analyzefieldByYear(data):
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, results = fieldAnalysisyear(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = fieldEachYear(files, filesToAnalyze, startYear, endYear)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/fieldAnalysis/year",

@@ -1,7 +1,7 @@
 import os
 import glob
 import requests
-def fieldAnalysisyear(files, filesToAnalyze, start, end):
+def fieldEachYear(files, filesToAnalyze, start, end):
     count = 0
     conditionCount = 0
     fieldAnalysis_count = dict()
