@@ -29,7 +29,7 @@ from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOc
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
-from fieldAnalysisCount import fieldAnalysisyear
+from fieldAnalysisCount import fieldEachYear, fieldOccurence
 
 app = Flask(__name__)
 CORS(app)
@@ -687,7 +687,7 @@ def analyzefieldByYear(data):
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, results = fieldAnalysisyear(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = fieldEachYear(files, filesToAnalyze, startYear, endYear)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/fieldAnalysis/year",
@@ -713,6 +713,50 @@ def analyzefieldByYear(data):
 def fieldAnalysisByYear():
     data = request.get_json()
     thread = threading.Thread(target=analyzefieldByYear, args=(data,))
+    thread.start()
+    return jsonify({"message": "Start analyzing"}), 200
+
+def analyzeFieldByOccurence(data):
+    try:
+        email = data.get('email')
+        password = data.get('password')
+        password = decrypt_string(password)
+        user = auth.sign_in_with_email_and_password(email, password)
+        userId = user['localId']
+        userEmail = user['email']
+        analysisRequests.add(userEmail)
+        workspace = data.get('workspace')
+        filesToAnalyze = data.get('files')
+        threshold = data.get('threshold')
+        doc_ref = db.collection('users').document(userEmail)
+        doc = doc_ref.get().to_dict()
+        if doc:
+            files = doc.get(workspace)
+            if files:
+                count, results = fieldOccurence(files, filesToAnalyze, threshold)
+                response = {
+                    "message": "Analysis done",
+                    "api": "/api/fieldAnalysis/occurence",
+                    "count": count,
+                    "results": results,
+                    "request": {
+                        "workspace": workspace,
+                        "files": filesToAnalyze,
+                        "threshold": threshold
+                    }
+                }
+                analysisResults[userEmail] = response
+            else:
+                analysisResults[userEmail] = "No files found"
+        else:
+            analysisResults[userEmail] = "No files found"
+    except Exception as e:
+        analysisResults[userEmail] = e
+
+@app.route('/api/fieldAnalysis/occurence', methods=['POST'])
+def fieldAnalysisByOccurence():
+    data = request.get_json()
+    thread = threading.Thread(target=analyzeFieldByOccurence, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
