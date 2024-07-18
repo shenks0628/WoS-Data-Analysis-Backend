@@ -124,19 +124,19 @@ def fieldKeyword(files, filesToAnalyze,field):
                 fields += line[3:].strip()
             elif line.startswith("PY "):
                 year = int(line[3:].strip())
-                if fields != "":
-                    fields = fields.lower()
-                    fields = fields.split(';')
-                    if target in fields:
-                        conditionCount += 1
-                        if year_count.get(year, False):
-                            year_count[year] += 1
-                        else:
-                            year_count[year] = 1
-                fields = ""
-                insideSC = False
             else:
-                insideSC = False
+                if insideSC:
+                    if fields != "":
+                        fields = fields.lower()
+                        fields = fields.split(';')
+                        if target in fields:
+                            conditionCount += 1
+                            if year_count.get(year, False):
+                                year_count[year] += 1
+                            else:
+                                year_count[year] = 1
+                    fields = ""
+                    insideSC = False
     sorted_year = sorted(year_count.items(), key=lambda x: x[0], reverse=False)
     print(sorted_year)
     results = []
