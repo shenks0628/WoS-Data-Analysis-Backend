@@ -98,3 +98,53 @@ def fieldOccurence(files, filesToAnalyze, threshold):
         if cnt >= 100:
             break
     return titleCount, results
+
+def fieldKeyword(files, filesToAnalyze,field):
+    count = 0
+    conditionCount = 0
+    year_count = dict()
+    for file in files:
+        fileName = file.get('name')
+        if fileName not in filesToAnalyze:
+            continue
+        fileURL = file.get('url')
+        response = requests.get(fileURL)
+        response.encoding = 'utf-8'
+        content = response.text
+        target = field.lower()
+        fields = ""
+        insideSC = False
+        for line in content.split('\n'):
+            if line.startswith("TI "):
+                count += 1
+            elif line.startswith("SC "):
+                insideSC = True
+                fields += line[3:].strip()
+            elif line.startswith("   ") and insideSC:
+                fields += line[3:].strip()
+            elif line.startswith("PY "):
+                year = int(line[3:].strip())
+                if fields != "":
+                    fields = fields.lower()
+                    fields = fields.split(';')
+                    if target in fields:
+                        conditionCount += 1
+                        if year_count.get(year, False):
+                            year_count[year] += 1
+                        else:
+                            year_count[year] = 1
+                fields = ""
+                insideSC = False
+            else:
+                insideSC = False
+    sorted_year = sorted(year_count.items(), key=lambda x: x[0], reverse=False)
+    print(sorted_year)
+    results = []
+    for year in sorted_year:
+        results.append({
+            'year': year[0],
+            'count': year[1]
+        })
+    start = min(year_count.keys())
+    end = max(year_count.keys())
+    return count, conditionCount, start, end, results
