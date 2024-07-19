@@ -25,7 +25,7 @@ import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
-from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
+# from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
