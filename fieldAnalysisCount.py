@@ -99,7 +99,7 @@ def fieldOccurence(files, filesToAnalyze, threshold):
             break
     return titleCount, results
 
-def fieldKeyword(files, filesToAnalyze,field):
+def fieldField(files, filesToAnalyze,field):
     count = 0
     conditionCount = 0
     year_count = dict()
