@@ -2,15 +2,11 @@ import os
 import glob
 import requests
 import threading
-from transformers import BertTokenizer, BertModel
+from NLP import model, tokenizer
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
 
 lock = threading.Lock()
-
-model_name = 'bert-base-uncased'
-tokenizer = BertTokenizer.from_pretrained(model_name)
-model = BertModel.from_pretrained(model_name)
 
 parent = dict()
 size = dict()
@@ -32,7 +28,7 @@ def union(x, y):
         parent[y] = x
         size[x] += size[y]
 
-def NLPonYear(files, filesToAnalyze, start, end):
+def NLPonKeywordByYear(files, filesToAnalyze, start, end):
     global lock, parent, size
     count = 0
     conditionCount = 0
@@ -68,7 +64,6 @@ def NLPonYear(files, filesToAnalyze, start, end):
                                 keyword_count[word] += 1
                             else:
                                 keyword_count[word] = 1
-                                keyword_list.append(word)
                 keyword = ""
                 insideDE = False
             else:
@@ -156,7 +151,6 @@ def NLPonKeywordEachYear(files, filesToAnalyze, target):
                             keyword_count[word] += 1
                         else:
                             keyword_count[word] = 1
-                            keyword_list.append(word)
                 keyword = ""
                 insideDE = False
     
@@ -284,7 +278,6 @@ def NLPonKeywordByOccurence(files, filesToAnalyze, threshold):
                             keyword_count[word] += 1
                         else:
                             keyword_count[word] = 1
-                            keyword_list.append(word)
                 keyword = ""
                 insideDE = False
     temp = sorted(keyword_count.items(), key=lambda x: x[1], reverse=True)

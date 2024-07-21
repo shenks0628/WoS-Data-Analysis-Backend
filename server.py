@@ -25,11 +25,12 @@ import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
 from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
-# from NLPKeywordAnalysis import NLPonYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
+# from NLPKeywordAnalysis import NLPonKeywordByYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
+# from NLPFieldAnalysis import NLPonFieldByYear, NLPonFieldEachYear, NLPonFieldByOccurence
 from authorcount import author
 from referenceCount import get_referencesInfo
 from checkWarning import checkTitle
-from fieldAnalysisCount import fieldEachYear, fieldOccurence, fieldKeyword
+from fieldAnalysisCount import fieldEachYear, fieldOccurence, fieldField
 
 app = Flask(__name__)
 CORS(app)
@@ -760,7 +761,7 @@ def fieldAnalysisByOccurence():
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def fieldAnalysisByKeyword(data):
+def analyzeFieldByField(data):
     try:
         email = data.get('email')
         password = data.get('password')
@@ -777,10 +778,10 @@ def fieldAnalysisByKeyword(data):
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, start, end, results = fieldKeyword(files, filesToAnalyze, field)
+                count, conditionCount, start, end, results = fieldField(files, filesToAnalyze, field)
                 response = {
                     "message": "Analysis done",
-                    "api": "/api/fieldAnalysis/keyword",
+                    "api": "/api/fieldAnalysis/field",
                     "count": count,
                     "conditionCount": conditionCount,
                     "start": start,
@@ -800,10 +801,10 @@ def fieldAnalysisByKeyword(data):
     except Exception as e:
         analysisResults[userEmail] = e
 
-@app.route('/api/fieldAnalysis/keyword', methods=['POST'])
-def fieldAnalysisByKeyword():
+@app.route('/api/fieldAnalysis/field', methods=['POST'])
+def fieldAnalysisByField():
     data = request.get_json()
-    thread = threading.Thread(target=fieldAnalysisByKeyword, args=(data,))
+    thread = threading.Thread(target=analyzeFieldByField, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
@@ -825,7 +826,7 @@ def fieldAnalysisByKeyword():
 #         if doc:
 #             files = doc.get(workspace)
 #             if files:
-#                 count, conditionCount, results = NLPonYear(files, filesToAnalyze, startYear, endYear)
+#                 count, conditionCount, results = NLPonKeywordByYear(files, filesToAnalyze, startYear, endYear)
 #                 response = {
 #                     "message": "Analysis done",
 #                     "api": "/api/NLPKA/year",
@@ -942,6 +943,144 @@ def fieldAnalysisByKeyword():
 # def NLPKeywordAnalysisByKeyword():
 #     data = request.get_json()
 #     thread = threading.Thread(target=NLPAnalyzeKeywordByKeyword, args=(data,))
+#     thread.start()
+#     return jsonify({"message": "Start analyzing"}), 200
+
+# def NLPAnalyzeFieldByYear(data):
+#     try:
+#         email = data.get('email')
+#         password = data.get('password')
+#         password = decrypt_string(password)
+#         user = auth.sign_in_with_email_and_password(email, password)
+#         userId = user['localId']
+#         userEmail = user['email']
+#         analysisRequests.add(userEmail)
+#         workspace = data.get('workspace')
+#         filesToAnalyze = data.get('files')
+#         startYear = data.get('start')
+#         endYear = data.get('end')
+#         doc_ref = db.collection('users').document(userEmail)
+#         doc = doc_ref.get().to_dict()
+#         if doc:
+#             files = doc.get(workspace)
+#             if files:
+#                 count, conditionCount, results = NLPonFieldByYear(files, filesToAnalyze, startYear, endYear)
+#                 response = {
+#                     "message": "Analysis done",
+#                     "api": "/api/NLPFA/year",
+#                     "count": count,
+#                     "conditionCount": conditionCount,
+#                     "results": results,
+#                     "request": {
+#                         "workspace": workspace,
+#                         "files": filesToAnalyze,
+#                         "start": startYear,
+#                         "end": endYear
+#                     }
+#                 }
+#                 analysisResults[userEmail] = response
+#             else:
+#                 analysisResults[userEmail] = "No files found"
+#         else:
+#             analysisResults[userEmail] = "No files found"
+#     except Exception as e:
+#         analysisResults[userEmail] = e
+
+# @app.route('/api/NLPFA/year', methods=['POST'])
+# def NLPFieldAnalysisByYear():
+#     data = request.get_json()
+#     thread = threading.Thread(target=NLPAnalyzeFieldByYear, args=(data,))
+#     thread.start()
+#     return jsonify({"message": "Start analyzing"}), 200
+
+# def NLPAnalyzeFieldByOccurence(data):
+#     try:
+#         email = data.get('email')
+#         password = data.get('password')
+#         password = decrypt_string(password)
+#         user = auth.sign_in_with_email_and_password(email, password)
+#         userId = user['localId']
+#         userEmail = user['email']
+#         analysisRequests.add(userEmail)
+#         workspace = data.get('workspace')
+#         filesToAnalyze = data.get('files')
+#         threshold = data.get('threshold')
+#         doc_ref = db.collection('users').document(userEmail)
+#         doc = doc_ref.get().to_dict()
+#         if doc:
+#             files = doc.get(workspace)
+#             if files:
+#                 count, results = NLPonFieldByOccurence(files, filesToAnalyze, threshold)
+#                 response = {
+#                     "message": "Analysis done",
+#                     "api": "/api/NLPFA/occurence",
+#                     "count": count,
+#                     "results": results,
+#                     "request": {
+#                         "workspace": workspace,
+#                         "files": filesToAnalyze,
+#                         "threshold": threshold
+#                     }
+#                 }
+#                 analysisResults[userEmail] = response
+#             else:
+#                 analysisResults[userEmail] = "No files found"
+#         else:
+#             analysisResults[userEmail] = "No files found"
+#     except Exception as e:
+#         analysisResults[userEmail] = e
+
+# @app.route('/api/NLPFA/occurence', methods=['POST'])
+# def NLPFieldAnalysisByOccurence():
+#     data = request.get_json()
+#     thread = threading.Thread(target=NLPAnalyzeFieldByOccurence, args=(data,))
+#     thread.start()
+#     return jsonify({"message": "Start analyzing"}), 200
+
+# def NLPAnalyzeFieldByField(data):
+#     try:
+#         email = data.get('email')
+#         password = data.get('password')
+#         password = decrypt_string(password)
+#         user = auth.sign_in_with_email_and_password(email, password)
+#         userId = user['localId']
+#         userEmail = user['email']
+#         analysisRequests.add(userEmail)
+#         workspace = data.get('workspace')
+#         filesToAnalyze = data.get('files')
+#         field = data.get('field')
+#         doc_ref = db.collection('users').document(userEmail)
+#         doc = doc_ref.get().to_dict()
+#         if doc:
+#             files = doc.get(workspace)
+#             if files:
+#                 count, conditionCount, start, end, results = NLPonFieldEachYear(files, filesToAnalyze, field)
+#                 response = {
+#                     "message": "Analysis done",
+#                     "api": "/api/NLPFA/field",
+#                     "count": count,
+#                     "conditionCount": conditionCount,
+#                     "start": start,
+#                     "end": end,
+#                     "results": results,
+#                     "request": {
+#                         "workspace": workspace,
+#                         "files": filesToAnalyze,
+#                         "field": field
+#                     }
+#                 }
+#                 analysisResults[userEmail] = response
+#             else:
+#                 analysisResults[userEmail] = "No files found"
+#         else:
+#             analysisResults[userEmail] = "No files found"
+#     except Exception as e:
+#         analysisResults[userEmail] = e
+
+# @app.route('/api/NLPFA/field', methods=['POST'])
+# def NLPFieldAnalysisByField():
+#     data = request.get_json()
+#     thread = threading.Thread(target=NLPAnalyzeFieldByField, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
