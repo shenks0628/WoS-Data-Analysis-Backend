@@ -118,20 +118,13 @@ def login():
                 return jsonify({"message": "Email not verified"}), 403
         else:
             return jsonify({"message": "No user found"}), 404
-        response = make_response(jsonify({
-            "message": "Login successful"
-        }), 200)
         encrypted = encrypt_string(f"{email}:{password}")
-        response.set_cookie('token', encrypted, samesite='None', path='/')
-        return response
+        return jsonify({
+            "message": "Login successful",
+            "token": encrypted
+        }), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
-    
-@app.route('/api/auth/logout', methods=['POST', 'GET'])
-def logout():
-    response = make_response(jsonify({"message": "Logout successful"}), 200)
-    response.set_cookie('token', '', expires=0)
-    return response
     
 @app.route('/api/auth/forgotPassword', methods=['POST'])
 def forgotPassword():
@@ -149,7 +142,7 @@ def upload():
     # get the file
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -200,7 +193,7 @@ def upload():
 def newWorkspace():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -246,7 +239,7 @@ def newWorkspace():
 def getWorkspace():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -281,7 +274,7 @@ def getWorkspace():
 def getFolder():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -309,7 +302,7 @@ def getFolder():
 def deleteFile():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -347,7 +340,7 @@ def deleteFile():
 def deleteWorkspace():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -379,7 +372,7 @@ def deleteWorkspace():
 def warning():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -411,7 +404,7 @@ def warning():
 def getResult():
     try:
         data = request.get_json()
-        token = request.cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -436,9 +429,9 @@ def getResult():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-def analyzeKeywordByYear(data, cookies):
+def analyzeKeywordByYear(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -482,14 +475,13 @@ def analyzeKeywordByYear(data, cookies):
 @app.route('/api/keywordAnalysis/year', methods=['POST'])
 def keywordAnalysisByYear():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeKeywordByYear, args=(data,cookies))
+    thread = threading.Thread(target=analyzeKeywordByYear, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeKeywordByOccurence(data, cookies):
+def analyzeKeywordByOccurence(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -529,14 +521,13 @@ def analyzeKeywordByOccurence(data, cookies):
 @app.route('/api/keywordAnalysis/occurence', methods=['POST'])
 def keywordAnalysisByOccurence():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeKeywordByOccurence, args=(data,cookies))
+    thread = threading.Thread(target=analyzeKeywordByOccurence, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeKeywordByKeyword(data, cookies):
+def analyzeKeywordByKeyword(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -579,14 +570,13 @@ def analyzeKeywordByKeyword(data, cookies):
 @app.route('/api/keywordAnalysis/keyword', methods=['POST'])
 def keywordAnalysisByKeyword():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeKeywordByKeyword, args=(data,cookies))
+    thread = threading.Thread(target=analyzeKeywordByKeyword, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeAuthorByYear(data, cookies):
+def analyzeAuthorByYear(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -629,14 +619,13 @@ def analyzeAuthorByYear(data, cookies):
 @app.route('/api/authorAnalysis/year', methods=['POST'])
 def authorAnalysisByYear():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeAuthorByYear, args=(data,cookies))
+    thread = threading.Thread(target=analyzeAuthorByYear, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeReferenceCountGetGeneralInfo(data, cookies):
+def analyzeReferenceCountGetGeneralInfo(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -674,14 +663,13 @@ def analyzeReferenceCountGetGeneralInfo(data, cookies):
 @app.route('/api/referenceCountAnalysis/generalInfo', methods=['POST'])
 def referenceCountAnalysisGetGeneralInfo():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeReferenceCountGetGeneralInfo, args=(data,cookies))
+    thread = threading.Thread(target=analyzeReferenceCountGetGeneralInfo, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzefieldByYear(data, cookies):
+def analyzefieldByYear(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -724,14 +712,13 @@ def analyzefieldByYear(data, cookies):
 @app.route('/api/fieldAnalysis/year', methods=['POST'])
 def fieldAnalysisByYear():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzefieldByYear, args=(data,cookies))
+    thread = threading.Thread(target=analyzefieldByYear, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeFieldByOccurence(data, cookies):
+def analyzeFieldByOccurence(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -771,14 +758,13 @@ def analyzeFieldByOccurence(data, cookies):
 @app.route('/api/fieldAnalysis/occurence', methods=['POST'])
 def fieldAnalysisByOccurence():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeFieldByOccurence, args=(data,cookies))
+    thread = threading.Thread(target=analyzeFieldByOccurence, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-def analyzeFieldByField(data, cookies):
+def analyzeFieldByField(data):
     try:
-        token = cookies.get('token')
+        token = data.get('token')
         account = decrypt_string(token)
         account = account.split(':')
         email = account[0]
@@ -821,14 +807,13 @@ def analyzeFieldByField(data, cookies):
 @app.route('/api/fieldAnalysis/field', methods=['POST'])
 def fieldAnalysisByField():
     data = request.get_json()
-    cookies = request.cookies
-    thread = threading.Thread(target=analyzeFieldByField, args=(data,cookies))
+    thread = threading.Thread(target=analyzeFieldByField, args=(data,))
     thread.start()
     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeKeywordByYear(data, cookies):
+# def NLPAnalyzeKeywordByYear(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -871,14 +856,13 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPKA/year', methods=['POST'])
 # def NLPKeywordAnalysisByYear():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeKeywordByYear, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeKeywordByYear, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeKeywordByOccurence(data, cookies):
+# def NLPAnalyzeKeywordByOccurence(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -918,14 +902,13 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPKA/occurence', methods=['POST'])
 # def NLPKeywordAnalysisByOccurence():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeKeywordByOccurence, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeKeywordByOccurence, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeKeywordByKeyword(data, cookies):
+# def NLPAnalyzeKeywordByKeyword(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -968,14 +951,13 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPKA/keyword', methods=['POST'])
 # def NLPKeywordAnalysisByKeyword():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeKeywordByKeyword, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeKeywordByKeyword, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeFieldByYear(data, cookies):
+# def NLPAnalyzeFieldByYear(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -1018,14 +1000,13 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPFA/year', methods=['POST'])
 # def NLPFieldAnalysisByYear():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeFieldByYear, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeFieldByYear, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeFieldByOccurence(data, cookies):
+# def NLPAnalyzeFieldByOccurence(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -1065,14 +1046,13 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPFA/occurence', methods=['POST'])
 # def NLPFieldAnalysisByOccurence():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeFieldByOccurence, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeFieldByOccurence, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
-# def NLPAnalyzeFieldByField(data, cookies):
+# def NLPAnalyzeFieldByField(data):
 #     try:
-#         token = cookies.get('token')
+#         token = data.get('token')
 #         account = decrypt_string(token)
 #         account = account.split(':')
 #         email = account[0]
@@ -1115,8 +1095,7 @@ def fieldAnalysisByField():
 # @app.route('/api/NLPFA/field', methods=['POST'])
 # def NLPFieldAnalysisByField():
 #     data = request.get_json()
-#     cookies = request.cookies
-#     thread = threading.Thread(target=NLPAnalyzeFieldByField, args=(data,cookies))
+#     thread = threading.Thread(target=NLPAnalyzeFieldByField, args=(data,))
 #     thread.start()
 #     return jsonify({"message": "Start analyzing"}), 200
 
