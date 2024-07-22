@@ -32,7 +32,7 @@ from checkWarning import checkTitle
 from fieldAnalysisCount import fieldEachYear, fieldOccurence, fieldField
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 jsonStr = decrypt_to_string('serviceAccount.json.secure')
 jsonObj = json.loads(jsonStr)
