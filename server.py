@@ -122,7 +122,7 @@ def login():
             "message": "Login successful"
         }), 200)
         encrypted = encrypt_string(f"{email}:{password}")
-        response.set_cookie('token', encrypted)
+        response.set_cookie('token', encrypted, samesite='None')
         return response
     except Exception as e:
         return jsonify({"message": str(e)}), 400
