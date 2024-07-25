@@ -23,7 +23,7 @@ from firebase_admin import credentials, storage, firestore, initialize_app, auth
 import pyrebase
 from cryptography.fernet import Fernet
 from fileSecure import decrypt_to_string, decrypt_string, encrypt_string
-from keywordCount import get_keywords, year, keywordEachYear, keywordOccurence
+from keywordCount import year, keywordEachYear, keywordOccurence
 # from NLPKeywordAnalysis import NLPonKeywordByYear, NLPonKeywordEachYear, NLPonKeywordByOccurence
 # from NLPFieldAnalysis import NLPonFieldByYear, NLPonFieldEachYear, NLPonFieldByOccurence
 from authorcount import author
@@ -444,12 +444,13 @@ def analyzeKeywordByYear(data):
         filesToAnalyze = data.get('files')
         startYear = data.get('start')
         endYear = data.get('end')
+        threshold = data.get('threshold')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, results = year(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = year(files, filesToAnalyze, startYear, endYear, threshold)
                 print(results)
                 response = {
                     "message": "Analysis done",
@@ -461,7 +462,8 @@ def analyzeKeywordByYear(data):
                         "workspace": workspace,
                         "files": filesToAnalyze,
                         "start": startYear,
-                        "end": endYear
+                        "end": endYear,
+                        "threshold": threshold
                     }
                 }
                 analysisResults[userEmail] = response
@@ -589,12 +591,13 @@ def analyzeAuthorByYear(data):
         filesToAnalyze = data.get('files')
         startYear = data.get('start')
         endYear = data.get('end')
+        threshold = data.get('threshold')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, results = author(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = author(files, filesToAnalyze, startYear, endYear, threshold)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/authorAnalysis/year",
@@ -605,7 +608,8 @@ def analyzeAuthorByYear(data):
                         "workspace": workspace,
                         "files": filesToAnalyze,
                         "start": startYear,
-                        "end": endYear
+                        "end": endYear,
+                        "threshold": threshold
                     }
                 }
                 analysisResults[userEmail] = response
@@ -682,12 +686,13 @@ def analyzefieldByYear(data):
         filesToAnalyze = data.get('files')
         startYear = data.get('start')
         endYear = data.get('end')
+        threshold = data.get('threshold')
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
         if doc:
             files = doc.get(workspace)
             if files:
-                count, conditionCount, results = fieldEachYear(files, filesToAnalyze, startYear, endYear)
+                count, conditionCount, results = fieldEachYear(files, filesToAnalyze, startYear, endYear, threshold)
                 response = {
                     "message": "Analysis done",
                     "api": "/api/fieldAnalysis/year",
@@ -698,7 +703,8 @@ def analyzefieldByYear(data):
                         "workspace": workspace,
                         "files": filesToAnalyze,
                         "start": startYear,
-                        "end": endYear
+                        "end": endYear,
+                        "threshold": threshold
                     }
                 }
                 analysisResults[userEmail] = response
@@ -826,12 +832,13 @@ def fieldAnalysisByField():
 #         filesToAnalyze = data.get('files')
 #         startYear = data.get('start')
 #         endYear = data.get('end')
+#         threshold = data.get('threshold')
 #         doc_ref = db.collection('users').document(userEmail)
 #         doc = doc_ref.get().to_dict()
 #         if doc:
 #             files = doc.get(workspace)
 #             if files:
-#                 count, conditionCount, results = NLPonKeywordByYear(files, filesToAnalyze, startYear, endYear)
+#                 count, conditionCount, results = NLPonKeywordByYear(files, filesToAnalyze, startYear, endYear, threshold)
 #                 response = {
 #                     "message": "Analysis done",
 #                     "api": "/api/NLPKA/year",
@@ -842,7 +849,8 @@ def fieldAnalysisByField():
 #                         "workspace": workspace,
 #                         "files": filesToAnalyze,
 #                         "start": startYear,
-#                         "end": endYear
+#                         "end": endYear,
+#                         "threshold": threshold
 #                     }
 #                 }
 #                 analysisResults[userEmail] = response
@@ -970,12 +978,13 @@ def fieldAnalysisByField():
 #         filesToAnalyze = data.get('files')
 #         startYear = data.get('start')
 #         endYear = data.get('end')
+#         threshold = data.get('threshold')
 #         doc_ref = db.collection('users').document(userEmail)
 #         doc = doc_ref.get().to_dict()
 #         if doc:
 #             files = doc.get(workspace)
 #             if files:
-#                 count, conditionCount, results = NLPonFieldByYear(files, filesToAnalyze, startYear, endYear)
+#                 count, conditionCount, results = NLPonFieldByYear(files, filesToAnalyze, startYear, endYear, threshold)
 #                 response = {
 #                     "message": "Analysis done",
 #                     "api": "/api/NLPFA/year",
@@ -986,7 +995,8 @@ def fieldAnalysisByField():
 #                         "workspace": workspace,
 #                         "files": filesToAnalyze,
 #                         "start": startYear,
-#                         "end": endYear
+#                         "end": endYear,
+#                         "threshold": threshold
 #                     }
 #                 }
 #                 analysisResults[userEmail] = response

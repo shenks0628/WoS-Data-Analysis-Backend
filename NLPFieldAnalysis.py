@@ -28,7 +28,7 @@ def union(x, y):
         parent[y] = x
         size[x] += size[y]
 
-def NLPonFieldByYear(files, filesToAnalyze, start, end):
+def NLPonFieldByYear(files, filesToAnalyze, start, end, threshold):
     global lock, parent, size
     count = 0
     conditionCount = 0
@@ -104,6 +104,8 @@ def NLPonFieldByYear(files, filesToAnalyze, start, end):
     results = []
     cnt = 0
     for field in sorted_fields:
+        if field[1] < threshold:
+            break
         results.append({
             'field': field[0],
             'count': field[1]
