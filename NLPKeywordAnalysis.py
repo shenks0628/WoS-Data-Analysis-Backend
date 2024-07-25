@@ -28,7 +28,7 @@ def union(x, y):
         parent[y] = x
         size[x] += size[y]
 
-def NLPonKeywordByYear(files, filesToAnalyze, start, end):
+def NLPonKeywordByYear(files, filesToAnalyze, start, end, threshold):
     global lock, parent, size
     count = 0
     conditionCount = 0
@@ -106,6 +106,8 @@ def NLPonKeywordByYear(files, filesToAnalyze, start, end):
     results = []
     cnt = 0
     for keyword in sorted_keywords:
+        if keyword[1] < threshold:
+            break
         results.append({
             'keyword': keyword[0],
             'count': keyword[1]

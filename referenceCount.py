@@ -2,7 +2,7 @@ import os
 import glob
 import requests
 
-def get_referencesInfo(files, filesToAnalyze):
+def get_referencesInfo(files, filesToAnalyze, threshold):
     TI = set()
     reference_count = dict()
     count = 0
@@ -58,11 +58,17 @@ def get_referencesInfo(files, filesToAnalyze):
     sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['count'], reverse=True)
 
     results = []
+    cnt = 0
     for item in sorted_references:
+        if item[1]['count'] < threshold:
+            break
         results.append({
             "title": item[1]["title"],
             "author": item[1]["author"],
             "count": item[1]["count"]
         })
+        cnt += 1
+        if cnt >= 100:
+            break
         
     return count, results

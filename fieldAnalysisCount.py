@@ -1,7 +1,7 @@
 import os
 import glob
 import requests
-def fieldEachYear(files, filesToAnalyze, start, end):
+def fieldEachYear(files, filesToAnalyze, start, end, threshold):
     count = 0
     conditionCount = 0
     fieldAnalysis_count = dict()
@@ -43,6 +43,8 @@ def fieldEachYear(files, filesToAnalyze, start, end):
     results = []
     cnt = 0
     for fieldAnalysis in sorted_fieldAnalysis:
+        if fieldAnalysis[1] < threshold:
+            break
         results.append({
             'field': fieldAnalysis[0],
             'count': fieldAnalysis[1]

@@ -2,7 +2,7 @@ import os
 import glob
 import requests
 
-def author(files, filesToAnalyze, start, end):
+def author(files, filesToAnalyze, start, end, threshold):
     count = 0
     conditionCount = 0
     author_count = dict()
@@ -48,6 +48,8 @@ def author(files, filesToAnalyze, start, end):
     results = []
     cnt = 0
     for author in sorted_authors:
+        if author[1] < threshold:
+            break
         results.append({
             'author': author[0],
             'count': author[1]
