@@ -58,11 +58,15 @@ def get_referencesInfo(files, filesToAnalyze):
     sorted_references = sorted(reference_count.items(), key=lambda x: x[1]['count'], reverse=True)
 
     results = []
+    cnt = 0
     for item in sorted_references:
         results.append({
             "title": item[1]["title"],
             "author": item[1]["author"],
             "count": item[1]["count"]
         })
+        cnt += 1
+        if cnt >= 100:
+            break
         
     return count, results
