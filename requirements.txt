@@ -5,6 +5,6 @@ pyrebase4
 cryptography
 requests
 gunicorn
-transformers
-torch
-scikit-learn
+# transformers
+# torch
+# scikit-learn

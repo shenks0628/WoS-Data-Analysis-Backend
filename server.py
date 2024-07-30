@@ -235,7 +235,7 @@ def newWorkspace():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/api/file/getWorkspace', methods=['POST', 'GET'])
+@app.route('/api/file/getWorkspace', methods=['POST'])
 def getWorkspace():
     try:
         data = request.get_json()
@@ -400,7 +400,7 @@ def warning():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/getResult', methods=['POST', 'GET'])
+@app.route('/api/getResult', methods=['POST'])
 def getResult():
     try:
         data = request.get_json()
