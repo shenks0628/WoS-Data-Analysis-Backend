@@ -322,6 +322,8 @@ def deleteFile():
             if files:
                 for file in files:
                     if filesToDelete.count(file.get('name')) > 0:
+                        blob = storage.blob(file.get('url').split('/')[-1])
+                        blob.delete()
                         resultFiles.remove(file)
                 doc_ref.update({
                     f'{workspace}': resultFiles
