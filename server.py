@@ -411,9 +411,9 @@ def getResult():
         account = account.split(':')
         email = account[0]
         password = account[1]
-        user = auth.sign_in_with_email_and_password(email, password)
-        userId = user['localId']
-        userEmail = user['email']
+        # user = auth.sign_in_with_email_and_password(email, password)
+        # userId = user['localId']
+        userEmail = email
         if userEmail in analysisRequests:
             if analysisResults.get(userEmail):
                 result = analysisResults[userEmail]
