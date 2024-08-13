@@ -131,12 +131,13 @@ def fieldField(files, filesToAnalyze,field):
                     if fields != "":
                         fields = fields.lower()
                         fields = fields.split(';')
-                        if target in fields:
-                            conditionCount += 1
-                            if year_count.get(year, False):
-                                year_count[year] += 1
-                            else:
-                                year_count[year] = 1
+                        for field in fields:
+                            if target == field.strip().lower():
+                                conditionCount += 1
+                                if year_count.get(year, False):
+                                    year_count[year] += 1
+                                else:
+                                    year_count[year] = 1
                     fields = ""
                     insideSC = False
     sorted_year = sorted(year_count.items(), key=lambda x: x[0], reverse=False)

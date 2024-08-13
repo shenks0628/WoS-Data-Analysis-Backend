@@ -83,12 +83,13 @@ def keywordEachYear(files, filesToAnalyze, target):
                 if keyword != "":
                     keyword = keyword.lower()
                     keyword = keyword.split(';')
-                    if target in keyword:
-                        conditionCount += 1
-                        if year_count.get(year, False):
-                            year_count[year] += 1
-                        else:
-                            year_count[year] = 1
+                    for word in keyword:
+                        if target == word.strip().lower():
+                            conditionCount += 1
+                            if year_count.get(year, False):
+                                year_count[year] += 1
+                            else:
+                                year_count[year] = 1
                 keyword = ""
                 insideDE = False
             else:
