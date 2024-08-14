@@ -101,7 +101,7 @@ def fieldOccurence(files, filesToAnalyze, threshold):
             break
     return titleCount, results
 
-def fieldField(files, filesToAnalyze,field):
+def fieldField(files, filesToAnalyze, field):
     count = 0
     conditionCount = 0
     year_count = dict()
@@ -131,8 +131,8 @@ def fieldField(files, filesToAnalyze,field):
                     if fields != "":
                         fields = fields.lower()
                         fields = fields.split(';')
-                        for field in fields:
-                            if target == field.strip().lower():
+                        for word in fields:
+                            if target == word.strip().lower():
                                 conditionCount += 1
                                 if year_count.get(year, False):
                                     year_count[year] += 1
