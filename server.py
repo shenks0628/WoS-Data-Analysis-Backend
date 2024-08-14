@@ -95,7 +95,9 @@ def register():
     try:
         user = auth.create_user_with_email_and_password(email, password)
         doc_ref = db.collection('users').document(email)
-        doc_ref.set({})
+        doc_ref.set({
+            'default workspace': []
+        })
         auth.send_email_verification(user['idToken'])
         return jsonify({"message": "Register successful"}), 200
     except Exception as e:
@@ -203,9 +205,6 @@ def newWorkspace():
         userId = user['localId']
         userEmail = user['email']
         doc_ref = db.collection('users').document(userEmail)
-        # check if the user exists
-        if not doc_ref.get().exists:
-            return jsonify({"message": "No user found"}), 404
         doc = doc_ref.get().to_dict()
         if doc:
             workspaces = doc.keys()
@@ -234,6 +233,7 @@ def newWorkspace():
                 "workspace": results
             }
             return jsonify(response), 200
+        return jsonify({"message": "No workspace found"}), 404
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
