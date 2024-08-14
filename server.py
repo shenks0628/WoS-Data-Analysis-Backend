@@ -95,9 +95,7 @@ def register():
     try:
         user = auth.create_user_with_email_and_password(email, password)
         doc_ref = db.collection('users').document(email)
-        doc_ref.set({
-            'default workspace': []
-        })
+        doc_ref.set({})
         auth.send_email_verification(user['idToken'])
         return jsonify({"message": "Register successful"}), 200
     except Exception as e:
@@ -206,34 +204,32 @@ def newWorkspace():
         userEmail = user['email']
         doc_ref = db.collection('users').document(userEmail)
         doc = doc_ref.get().to_dict()
-        if doc:
-            workspaces = doc.keys()
-            workspaces = list(workspaces)
-            if name not in workspaces:
-                workspaces.append(name)
+        workspaces = doc.keys()
+        workspaces = list(workspaces)
+        if name not in workspaces:
+            workspaces.append(name)
+        else:
+            return jsonify({"message": "Workspace already exists"}), 400
+        doc_ref.update({
+            f'{name}': []
+        })
+        print(workspaces)
+        results = []
+        for i in range(len(workspaces)):
+            if workspaces[i] == name:
+                cnt = 0
             else:
-                return jsonify({"message": "Workspace already exists"}), 400
-            doc_ref.update({
-                f'{name}': []
+                cnt = len(doc.get(workspaces[i]))
+            results.append({
+                'name': workspaces[i],
+                'count': cnt
             })
-            print(workspaces)
-            results = []
-            for i in range(len(workspaces)):
-                if workspaces[i] == name:
-                    cnt = 0
-                else:
-                    cnt = len(doc.get(workspaces[i]))
-                results.append({
-                    'name': workspaces[i],
-                    'count': cnt
-                })
-            response = {
-                "message": "Workspace created",
-                "count": len(results),
-                "workspace": results
-            }
-            return jsonify(response), 200
-        return jsonify({"message": "No workspace found"}), 404
+        response = {
+            "message": "Workspace created",
+            "count": len(results),
+            "workspace": results
+        }
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
