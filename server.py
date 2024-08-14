@@ -199,6 +199,8 @@ def newWorkspace():
         email = account[0]
         password = account[1]
         name = data.get('name')
+        if not re.match("^[a-zA-Z0-9_]*$", name):
+            return jsonify({"message": "工作區名稱僅可包含大小寫英文字母、數字、底線。其餘符號皆不符合規則。"}), 400
         user = auth.sign_in_with_email_and_password(email, password)
         userId = user['localId']
         userEmail = user['email']
