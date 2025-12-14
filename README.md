@@ -1,6 +1,6 @@
 # WoS Data Analysis Backend
 ## API documentation
-* 詳細 API 說明文件已上傳至 HackMD，連結 https://hackmd.io/@shen0628/WoS-API。
+* 詳細 API 說明文件已上傳至 HackMD，連結 https://hackmd.io/@shen0628/WoS-API
 
 ## Steps to run the backend server locally
 * 使用前須將以下部分註解「**去除**」：
@@ -14,3 +14,6 @@
 * 應自行生成 Firebase 的 apiKey 並加密。
 * serviceAccount.json.secure 是 Firebase Admin SDK 的密鑰檔案經過 fileSecure.py 中的 encrypt_file 函式產生的檔案。欲解密請使用 decrypt_to_string 函式。
 * server.py 中的第 45 行是 Firebase 的 apiKey 經過 fileSecure.py 中的 encrypt_string 函式所取得。欲解密請使用 decrypt_string 函式。
+
+## Details
+For further information and system details, feel free to contact me or other contributors.
