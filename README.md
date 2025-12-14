@@ -6,7 +6,7 @@
 * 使用前須將以下部分註解「**去除**」：
   * requirements.txt 中最後三行（下載必要程式庫；另外，可將檔案中的 gunicorn 註解掉，因為本地端運行用不到）
   * fileSecure.py 中第 8、10 行（load .env）
-  * server.py 中第 27 ~ 28 行、第 840 ~ 1142 行（Enable BERT model to group similar topics）
+  * server.py 中第 27 ~ 28 行、第 840 ~ 1142 行（Enable BERT model for semantic keyword clustering）
 * 使用 pip 下載會用到的程式庫 `pip install -r requirements.txt`
 * 做完以上步驟即可順利執行 `python server.py`
 
